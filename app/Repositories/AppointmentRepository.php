@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\Appointment;
@@ -10,10 +11,15 @@ class AppointmentRepository
         return Appointment::create($data);
     }
 
-    public function allForUser(string $userId, string $tenantId)
+    public function allForUser(string $userId, string $tenantId, ?string $startDate = null, ?string $endDate = null)
     {
-        return Appointment::where('user_id', $userId)
-                          ->where('tenant_id', $tenantId)
-                          ->get();
+        $query = Appointment::where('user_id', $userId)
+            ->where('tenant_id', $tenantId);
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('start_time', [$startDate, $endDate]);
+        }
+        
+        return $query->orderBy('start_time')->get();
     }
 }

@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use App\DTOs\RegisterDTO;
 use App\Services\RegisterService;
 use App\Http\Requests\RegisterRequest;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -21,7 +28,11 @@ class AuthController extends Controller
 
             $result = $registerService->register($dto);
 
-            $token = auth('api')->login($result['user']);
+            // $token = auth('api')->login($result['user']);
+
+            if (! $token = JWTAuth::attempt($result['user'])) {
+                return response()->json(['error' => 'Não autorizado'], 401);
+            }
 
             return response()->json([
                 'message' => 'Usuário e Tenant criados com sucesso',
@@ -32,5 +43,30 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function refresh(Request $request)
+    {
+        // Tenta obter o token atual (mesmo expirado)
+        $token = $request->bearerToken();
+
+        if (! $token) {
+            return response()->json(['error' => 'Token não fornecido'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        try {
+            $newToken = JWTAuth::parseToken()->refresh();
+            return response()->json(['token' => $newToken]);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['error' => 'Token expirado e não pode ser renovado'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['error' => 'Token inválido ' . $e->getMessage()], 401);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token não encontrado'], 401);
+        }
+
+        return response()->json([
+            'token' => $newToken
+        ]);
     }
 }

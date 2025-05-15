@@ -24,6 +24,8 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
+Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('jwt.refresh');
+
 Route::middleware('auth:api')->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::post('/appointments', [AppointmentController::class, 'store']);

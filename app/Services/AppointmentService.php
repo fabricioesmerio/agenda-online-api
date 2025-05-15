@@ -16,9 +16,9 @@ class AppointmentService
         return $this->repository->create($data);
     }
 
-    public function list(string $userId, string $tenantId)
+    public function list(string $userId, string $tenantId, ?string $startDate = null, ?string $endDate = null)
     {
-        return $this->repository->allForUser($userId, $tenantId);
+        return $this->repository->allForUser($userId, $tenantId, $startDate, $endDate);
     }
 
     public function update(Appointment $appointment, array $data): Appointment

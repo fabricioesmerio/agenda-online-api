@@ -35,8 +35,10 @@ class AppointmentController extends Controller
         return response()->json($appointment, 201);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
         $user = Auth::user();
         return response()->json(
             $this->service->list($user->id, $user->tenant_id)
@@ -45,7 +47,7 @@ class AppointmentController extends Controller
 
     public function update(AppointmentRequest $request, string $id)
     {
-        $appointment = Appointment::findOrFail($id);        
+        $appointment = Appointment::findOrFail($id);
 
         if (Auth::user()->id !== $appointment->user_id) {
             return response()->json(['message' => 'Você não tem permissão para editar este compromisso.'], 403);
