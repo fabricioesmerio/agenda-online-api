@@ -1,0 +1,43 @@
+version: '3'
+services:
+    php:
+        build: .
+        networks:
+            - backend
+        expose:
+            - "9000"
+        volumes:
+            - .:/var/www/html
+    nginx:
+        image: nginx:mainline-alpine
+        networks:
+          - backend
+        ports:
+          - '80:80'
+        restart: on-failure
+        volumes:
+          - .:/var/www/html
+          - ./nginx_config.conf:/etc/nginx/conf.d/site.conf
+        links:
+            - php
+        depends_on:
+            - php
+    mariadb:
+        image: mariadb
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: db_name
+            MYSQL_USER: db_user
+            MYSQL_PASSWORD: secret
+        networks:
+            - backend
+        ports:
+            - '3306:3306'
+        restart: on-failure
+        volumes:
+            - databaseVolume:/var/lib/mysql
+volumes:
+    databaseVolume: {}
+networks:
+    backend:
+        driver: bridge
