@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libsqlite3-dev \
-    libmysqlclient-dev \
+    default-libmysqlclient-dev \
     && docker-php-ext-install \
         bz2 \
         intl \
