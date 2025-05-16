@@ -15,7 +15,7 @@ Route::post('/login', function (Request $request) {
     $credentials = $request->only(['email', 'password']);
 
     if (!$token = auth('api')->attempt($credentials)) {
-        abort(400, 'Unauthorized');
+        abort(400, 'E-mail e/ou senha incorretos');
     }
 
     return response()->json([
