@@ -25,10 +25,10 @@ services:
     mariadb:
         image: mariadb
         environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: db_name
-            MYSQL_USER: db_user
-            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
         networks:
             - backend
         ports:

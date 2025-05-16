@@ -1,29 +1,29 @@
 FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
-    git \
-    zip \
-    curl \
-    sudo \
-    unzip \
-    libicu-dev \
     libbz2-dev \
+    libicu-dev \
+    libxml2-dev \
+    libzip-dev \
+    libonig-dev \
+    zlib1g-dev \
     libpng-dev \
     libjpeg-dev \
-    libmcrypt-dev \
-    libreadline-dev \
-    libfreetype6-dev
-
-RUN docker-php-ext-install \
-    bz2 \
-    intl \
-    iconv \
-    bcmath \
-    opcache \
-    calendar \
-    mbstring \
-    pdo_mysql \
-    zip
+    libfreetype6-dev \
+    libsqlite3-dev \
+    libmysqlclient-dev \
+    && docker-php-ext-install \
+        bz2 \
+        intl \
+        iconv \
+        bcmath \
+        opcache \
+        calendar \
+        mbstring \
+        pdo_mysql \
+        zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
