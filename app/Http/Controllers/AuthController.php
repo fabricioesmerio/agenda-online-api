@@ -28,9 +28,12 @@ class AuthController extends Controller
 
             $result = $registerService->register($dto);
 
-            // $token = auth('api')->login($result['user']);
+            $credentials = [
+                'email' => $dto->email,
+                'password' => $dto->password,
+            ];
 
-            if (! $token = JWTAuth::attempt($result['user'])) {
+            if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Não autorizado'], 401);
             }
 
