@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Instala dependências
+# Instalar dependências do sistema e extensões PHP usadas pelo Laravel
 RUN apt-get update && apt-get install -y \
     libbz2-dev \
     libicu-dev \
@@ -13,20 +13,32 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libsqlite3-dev \
     default-libmysqlclient-dev \
-    git unzip curl \
-    && docker-php-ext-install \
-        bz2 intl iconv bcmath opcache calendar mbstring pdo_mysql zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    unzip \
+    curl \
+    git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd bz2 intl pdo_mysql zip mbstring xml bcmath opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instala Composer
+# Instalar composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+# Definir diretório de trabalho
+WORKDIR /var/www/html
 
-# Copia tudo (opcional — pode mover para docker-compose bind)
-# COPY . .
+# Copiar composer.json e composer.lock antes para otimizar build
+COPY laravel/composer.json laravel/composer.lock ./
 
+# Instalar dependências PHP com composer
+RUN composer install --no-dev --optimize-autoloader
+
+# Copiar todo o código Laravel para dentro do container
+COPY laravel/ ./
+
+# Ajustar permissões para storage e cache
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# Expor a porta do PHP-FPM
 EXPOSE 9000
 
 CMD ["php-fpm"]
