@@ -1,75 +1,62 @@
-version: '3'
+version: '3.8'
 
 services:
-    nginx-proxy:
-        image: jwilder/nginx-proxy
-        container_name: nginx-proxy
-        restart: unless-stopped
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - /etc/nginx/vhost.d
-            - ./certs:/etc/nginx/certs:ro
-            - /var/run/docker.sock:/tmp/docker.sock:ro
-        networks:
-            - backend
+  app:
+    build:
+      context: .
+    container_name: laravel-app
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+        - laravel
 
-    letsencrypt:
-        image: jrcs/letsencrypt-nginx-proxy-companion
-        container_name: nginx-proxy-ssl
-        restart: unless-stopped
-        environment:
-            NGINX_PROXY_CONTAINER: nginx-proxy
-        volumes:
-            - ./certs:/etc/nginx/certs
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-        networks:
-            - backend
+  db:
+    image: mariadb:10.5
+    container_name: mariadb
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        MYSQL_DATABASE: ${DB_DATABASE}
+        MYSQL_USER: ${DB_USERNAME}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+        - laravel
 
-    php:
-        build: .
-        networks:
-            - backend
-        expose:
-            - "9000"
-        volumes:
-            - .:/var/www/html
+  webserver:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    depends_on:
+      - app
+    networks:
+        - laravel
 
-    nginx-app:
-        image: nginx:alpine
-        volumes:
-            - .:/var/www/html
-            - ./nginx_config.conf:/etc/nginx/conf.d/nginx_config.conf
-        networks:
-            - backend
-        expose:
-            - "80"
-        environment:
-            VIRTUAL_HOST: bugzilla.online,www.bugzilla.online
-            LETSENCRYPT_HOST: bugzilla.online,www.bugzilla.online
-            LETSENCRYPT_EMAIL: fabricio1esmerio@gmail.com
-        depends_on:
-            - php
-
-    mariadb:
-        image: mariadb
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_USER: ${DB_USERNAME}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-        networks:
-            - backend
-        ports:
-            - '3306:3306'
-        restart: on-failure
-        volumes:
-            - databaseVolume:/var/lib/mysql
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 6h & wait $${!}; certbot renew; done'"
+    networks:
+        - laravel
 
 volumes:
-    databaseVolume: {}
+  dbdata:
+  certbot-etc:
+  certbot-var:
 
 networks:
-    backend:
-        driver: bridge
+  laravel:
