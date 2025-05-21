@@ -12,7 +12,6 @@ services:
             - /etc/nginx/vhost.d
             - ./certs:/etc/nginx/certs:ro
             - /var/run/docker.sock:/tmp/docker.sock:ro
-            - ./html:/usr/share/nginx/html
         networks:
             - backend
 
@@ -41,11 +40,11 @@ services:
         image: nginx:alpine
         volumes:
             - .:/var/www/html
-            - ./nginx_app.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx_config.conf:/etc/nginx/conf.d/nginx_config.conf
         networks:
             - backend
         expose:
-            - "80"
+            - "80:80"
         environment:
             VIRTUAL_HOST: bugzilla.online,www.bugzilla.online
             LETSENCRYPT_HOST: bugzilla.online,www.bugzilla.online
