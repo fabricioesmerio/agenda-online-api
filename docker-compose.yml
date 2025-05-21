@@ -1,45 +1,76 @@
 version: '3'
+
 services:
-    php:
-        build: .
-        networks:
-            - backend
-        expose:
-            - "9000"
-        volumes:
-            - .:/var/www/html
-    nginx:
-        image: nginx:mainline-alpine
-        networks:
-          - backend
-        ports:
-          - '80:80'
-          - '443:443'
-        restart: on-failure
-        volumes:
-          - .:/var/www/html
-          - ./nginx_config.conf:/etc/nginx/conf.d/site.conf
-          - ./ssl:/etc/nginx/ssl
-        links:
-            - php
-        depends_on:
-            - php
-    mariadb:
-        image: mariadb
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_USER: ${DB_USERNAME}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-        networks:
-            - backend
-        ports:
-            - '3306:3306'
-        restart: on-failure
-        volumes:
-            - databaseVolume:/var/lib/mysql
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - ./certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - backend
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-ssl
+    restart: unless-stopped
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    volumes:
+      - ./certs:/etc/nginx/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backend
+
+  php:
+    build: .
+    networks:
+      - backend
+    expose:
+      - "9000"
+    volumes:
+      - .:/var/www/html
+
+  laravel-app:
+    image: nginx:mainline-alpine
+    networks:
+      - backend
+    environment:
+      VIRTUAL_HOST: api.bugzilla.online
+      LETSENCRYPT_HOST: api.bugzilla.online
+      LETSENCRYPT_EMAIL: seu@email.com
+    expose:
+      - "80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+
+  mariadb:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - backend
+    ports:
+      - '3306:3306'
+    restart: on-failure
+    volumes:
+      - databaseVolume:/var/lib/mysql
+
 volumes:
-    databaseVolume: {}
+  databaseVolume: {}
+
 networks:
-    backend:
-        driver: bridge
+  backend:
+    driver: bridge
