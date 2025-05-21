@@ -44,7 +44,7 @@ services:
         networks:
             - backend
         expose:
-            - "80:80"
+            - "80"
         environment:
             VIRTUAL_HOST: bugzilla.online,www.bugzilla.online
             LETSENCRYPT_HOST: bugzilla.online,www.bugzilla.online
