@@ -7,7 +7,7 @@ staging=0 # mude para 1 se quiser testar sem gerar certificado válido
 mkdir -p "./certbot/www"
 mkdir -p "./certbot/conf"
 
-args="--webroot -w /var/www/public"
+args="--webroot -w /var/www/public \"
 for domain in "${domains[@]}"; do
   args="$args -d $domain"
 done
