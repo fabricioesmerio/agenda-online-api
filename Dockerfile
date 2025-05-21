@@ -1,5 +1,6 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
+# Instala dependências
 RUN apt-get update && apt-get install -y \
     libbz2-dev \
     libicu-dev \
@@ -12,21 +13,20 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libsqlite3-dev \
     default-libmysqlclient-dev \
+    git unzip curl \
     && docker-php-ext-install \
-        bz2 \
-        intl \
-        iconv \
-        bcmath \
-        opcache \
-        calendar \
-        mbstring \
-        pdo_mysql \
-        zip \
+        bz2 intl iconv bcmath opcache calendar mbstring pdo_mysql zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Instala Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-CMD ["sh", "-c", "chown -R www-data:www-data /var/www/html/storage && cd /var/www/html && composer install && php artisan key:generate && php-fpm"]
+WORKDIR /var/www
+
+# Copia tudo (opcional — pode mover para docker-compose bind)
+# COPY . .
 
 EXPOSE 9000
+
+CMD ["php-fpm"]
