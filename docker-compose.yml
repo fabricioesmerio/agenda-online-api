@@ -6,7 +6,7 @@ networks:
 
 services:
     app:
-        image: php:8.2-fpm
+        build: .
         container_name: laravel_app
         volumes:
             - ./laravel:/var/www/html
@@ -15,7 +15,7 @@ services:
             - app-network
         ports:
             - "9000:9000"
-        command: php-fpm -F
+        command: php-fpm
         depends_on:
             - db
 
