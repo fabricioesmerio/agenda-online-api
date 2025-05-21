@@ -42,9 +42,9 @@ services:
     networks:
       - backend
     environment:
-      VIRTUAL_HOST: api.bugzilla.online
-      LETSENCRYPT_HOST: api.bugzilla.online
-      LETSENCRYPT_EMAIL: seu@email.com
+      VIRTUAL_HOST: bugzilla.online, www.bugzilla.online
+      LETSENCRYPT_HOST: bugzilla.online, www.bugzilla.online
+      LETSENCRYPT_EMAIL: fabricio1esmerio@gmail.com
     expose:
       - "80"
     volumes:
