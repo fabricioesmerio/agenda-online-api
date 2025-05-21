@@ -33,7 +33,7 @@ services:
         networks:
         - backend
         expose:
-            - "80"
+            - "9000"
         volumes:
             - .:/var/www/html
         environment:
