@@ -26,4 +26,9 @@ class AppointmentService
         $appointment->update($data);
         return $appointment;
     }
+
+    public function delete(Appointment $appointment): void
+    {
+        $this->repository->delete($appointment);
+    }
 }

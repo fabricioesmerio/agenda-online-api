@@ -57,4 +57,17 @@ class AppointmentController extends Controller
 
         return response()->json($updated);
     }
+
+    public function delete(string $id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        if (Auth::user()->id !== $appointment->user_id) {
+            return response()->json(['message' => 'Você não tem permissão para editar este compromisso.'], 403);
+        }
+
+        $this->service->delete($appointment);
+
+        return response()->json(['message' => 'Compromisso excluído com sucesso.']);
+    }
 }

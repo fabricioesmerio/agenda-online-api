@@ -19,7 +19,12 @@ class AppointmentRepository
         if ($startDate && $endDate) {
             $query->whereBetween('start_time', [$startDate, $endDate]);
         }
-        
+
         return $query->orderBy('start_time')->get();
+    }
+
+    public function delete(Appointment $appointment): void
+    {
+        $appointment->delete();
     }
 }
