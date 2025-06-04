@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Filters\AppointmentFilter;
 use App\Models\Appointment;
+use Illuminate\Http\Request;
 
 class AppointmentRepository
 {
@@ -11,14 +13,14 @@ class AppointmentRepository
         return Appointment::create($data);
     }
 
-    public function allForUser(string $userId, string $tenantId, ?string $startDate = null, ?string $endDate = null)
+    public function allForUser(Request $request, string $userId, string $tenantId)
     {
-        $query = Appointment::where('user_id', $userId)
+        $query = Appointment::query()
+            ->where('user_id', $userId)
             ->where('tenant_id', $tenantId);
 
-        if ($startDate && $endDate) {
-            $query->whereBetween('start_time', [$startDate, $endDate]);
-        }
+        $filter = new AppointmentFilter($request);
+        $query = $filter->apply($query);
 
         return $query->orderBy('start_time')->get();
     }

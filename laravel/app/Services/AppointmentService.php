@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Repositories\AppointmentRepository;
+use Illuminate\Http\Request;
 
 class AppointmentService
 {
@@ -16,9 +17,9 @@ class AppointmentService
         return $this->repository->create($data);
     }
 
-    public function list(string $userId, string $tenantId, ?string $startDate = null, ?string $endDate = null)
+    public function list(Request $request, string $userId, string $tenantId)
     {
-        return $this->repository->allForUser($userId, $tenantId, $startDate, $endDate);
+        return $this->repository->allForUser($request, $userId, $tenantId);
     }
 
     public function update(Appointment $appointment, array $data): Appointment

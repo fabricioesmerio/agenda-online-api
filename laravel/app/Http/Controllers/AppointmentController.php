@@ -37,11 +37,9 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
         $user = Auth::user();
         return response()->json(
-            $this->service->list($user->id, $user->tenant_id)
+            $this->service->list($request, $user->id, $user->tenant_id)
         );
     }
 
