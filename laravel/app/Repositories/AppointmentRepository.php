@@ -15,7 +15,7 @@ class AppointmentRepository
 
     public function allForUser(Request $request, string $userId, string $tenantId)
     {
-        $query = Appointment::query()
+        $query = Appointment::with('status')
             ->where('user_id', $userId)
             ->where('tenant_id', $tenantId);
 

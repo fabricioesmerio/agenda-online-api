@@ -26,6 +26,7 @@ class AppointmentRequest extends FormRequest
             'description' => 'nullable|string',
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
+            'status_id' => 'nullable|string',
         ];
     }
 }

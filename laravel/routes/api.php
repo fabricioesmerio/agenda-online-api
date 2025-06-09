@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
     Route::delete('/appointments/{id}', [AppointmentController::class, 'delete']);
+});
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/status', [StatusController::class, 'store']);
+    Route::get('/status', [StatusController::class, 'index']);
+    Route::get('/status/{id}', [StatusController::class, 'getById']);
+    Route::put('/status/{id}', [StatusController::class, 'update']);
 });

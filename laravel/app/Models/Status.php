@@ -17,6 +17,7 @@ class Status extends Model
     ];
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $table = 'status';
 
     protected static function booted()
     {
