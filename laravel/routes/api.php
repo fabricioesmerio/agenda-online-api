@@ -26,6 +26,9 @@ Route::post('/login', function (Request $request) {
 });
 
 Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('jwt.refresh');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,5');
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index']);
