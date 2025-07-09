@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\DTOs\RegisterDTO;
 use App\Services\RegisterService;
 use App\Http\Requests\RegisterRequest;
-use App\Mail\ForgotPasswordMail;
 use App\Models\PasswordReset;
 use App\Models\User;
 use App\Repositories\UserPasswordRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -19,6 +17,7 @@ use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Services\MailerSendService;
 
 class AuthController extends Controller
 {
@@ -85,7 +84,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request, MailerSendService $mailer)
     {
         $request->validate(['email' => 'required|email']);
         $user = User::where('email', $request->email)->first();
@@ -100,7 +99,12 @@ class AuthController extends Controller
                     'expires_at' => now()->addMinutes(30),
                 ]
             );
-            Mail::to($user->email)->send(new ForgotPasswordMail($token));
+            $url = "https://tuagenda.com.br/change-password/{$token}";
+            $html = $mailer->renderTemplate('views/emails/forgot-password-template.html', [
+                'resetLink' => $url,
+                'ano' => date('Y'),
+            ]);
+            $mailer->sendEmail($user->email, $user->name, 'Redefinição de senha', $html);
         }
 
         return response()->json(['message' => 'Se este e-mail estiver cadastrado em nosso sistema, você receberá uma mensagem com as instruções em instantes.']);

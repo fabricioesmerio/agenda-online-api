@@ -36,7 +36,10 @@ return [
     */
 
     'mailers' => [
-
+        'mailersend' => [
+            'transport' => 'mailersend',
+        ],
+        
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
@@ -111,8 +114,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
-    ],
+    'address' => env('MAIL_FROM_ADDRESS', 'admin@tuagenda.com.br'),
+    'name' => env('MAIL_FROM_NAME', 'Tuagenda'),
+],
 
 ];
